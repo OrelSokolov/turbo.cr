@@ -47,6 +47,17 @@ module Turbo
     @@signed_stream_verifier.not_nil!
   end
 
+  # Railtie-клей (аналог turbo-rails engine: message_verifier
+  # :turbo_streams): ключ подписи стримов из secret_key_base приложения.
+  # Деривация Rails 8.1 KeyGenerator — PBKDF2-HMAC-SHA256, 1000 итераций,
+  # 64 байта, соль "turbo/signed_stream_verifier_key".
+  def self.signed_stream_verifier_key_from_secret!(secret : String) : Nil
+    key = ActiveSupport::CachingKeyGenerator.new(
+      ActiveSupport::KeyGenerator.new(secret, iterations: 1000, digest: :sha256)
+    ).generate_key("turbo/signed_stream_verifier_key")
+    self.signed_stream_verifier_key = String.new(key)
+  end
+
   # Cable-сервер для broadcast_stream_to (в Rails — ActionCable.server).
   # Приложение подменяет на свой (PG/Redis pubsub); дефолт — Async.
   @@cable_server : ActionCable::Server?
