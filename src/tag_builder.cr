@@ -16,7 +16,7 @@
 module Turbo
   module Streams
     class TagBuilder
-      def initialize(@view : ActionView::Rendering)
+      def initialize(@view : ERB::Rendering)
       end
 
       def remove(target : DomTarget) : ActionView::SafeString

@@ -1,13 +1,19 @@
 name: turbo_cr
-version: 0.1.1
+version: 0.1.2
 crystal: ">= 1.21.0"
 dependencies:
   active_support_cr:
     github: OrelSokolov/active_support.cr
     version: ~> 0.1.0
+  # ERB-слой (ERB::Rendering/ERB::SafeString) используется напрямую
+  # (tag_builder, streams) — требуется action_view >= 0.1.1, где он
+  # выделен из ActionView в erb_cr.
+  erb_cr:
+    github: OrelSokolov/erb.cr
+    version: ~> 0.1.0
   action_view_cr:
     github: OrelSokolov/action_view.cr
-    version: ~> 0.1.0
+    version: ~> 0.1.1
   action_pack_cr:
     github: OrelSokolov/action_pack.cr
     version: ~> 0.1.0

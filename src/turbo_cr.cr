@@ -8,6 +8,7 @@
 require "base64"
 require "html"
 require "active_support_cr"
+require "erb_cr"
 require "action_view_cr"
 require "action_pack_cr"
 require "action_cable_cr"
