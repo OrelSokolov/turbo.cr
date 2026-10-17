@@ -1,5 +1,5 @@
 name: turbo_cr
-version: 0.1.2
+version: 0.1.3
 crystal: ">= 1.21.0"
 dependencies:
   active_support_cr:
@@ -16,7 +16,7 @@ dependencies:
     version: ~> 0.1.1
   action_pack_cr:
     github: OrelSokolov/action_pack.cr
-    version: ~> 0.1.0
+    version: ">= 0.1.0"
   action_cable_cr:
     github: OrelSokolov/action_cable.cr
     version: ~> 0.1.0
