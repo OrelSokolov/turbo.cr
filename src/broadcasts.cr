@@ -83,10 +83,13 @@ module Turbo
       def broadcast_prepend_to(streamables : Array(Streamable), *,
                                target : DomTarget = nil, targets : DomTarget = nil,
                                content : String? = nil, html : String? = nil,
-                               partial : String? = nil, locals : Hash(String, RenderVal)? = nil,
+                               partial : String? = nil, template : String? = nil,
+                               locals : Hash(String, RenderVal)? = nil,
+                               assigns : Hash(String, RenderVal)? = nil,
                                render : Bool? = nil) : Nil
         broadcast_action_to(streamables, :prepend, target: target, targets: targets,
-                            content: content, html: html, partial: partial, locals: locals, render: render)
+                            content: content, html: html, partial: partial, template: template,
+                            locals: locals, assigns: assigns, render: render)
       end
 
       def broadcast_refresh_to(streamables : Array(Streamable)) : Nil
