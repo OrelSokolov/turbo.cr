@@ -134,7 +134,10 @@ module Turbo
             content.to_s
           end
         when block
-          HTML.escape(@view.capture { block.call.not_nil! })
+          # capture: SafeString (из буфера) идёт как есть, plain String
+          # из блока экранируется (прежняя семантика, оракул tb_*).
+          captured = @view.capture { block.call.not_nil! }
+          captured.is_a?(ERB::SafeString) ? captured.to_s : HTML.escape(captured)
         when partial
           l = {} of String => RenderVal
           (locals || {} of String => RenderVal).each { |k, v| l[k.to_s] = v.as(RenderVal) }

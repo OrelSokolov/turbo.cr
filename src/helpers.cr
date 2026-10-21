@@ -35,28 +35,30 @@ module Turbo
 
   module FramesHelper
     # <turbo-frame id="..." [src=...] [loading=...]>; блочная форма —
-    # содержимое блока экранируется (content_tag-семантика Rails),
-    # SafeString проходит как есть.
+    # capture-семантика (как button_to в action_view_cr): блок из ERB
+    # аппендит в общий буфер, capture собирает его. Захваченный из
+    # буфера вывод — SafeString, идёт как есть (html_safe, как
+    # SafeBuffer у Rails CaptureHelper); блок, возвращающий plain
+    # String без аппендов, экранируется (оракул гемa
+    # helper_turbo_frame_tag_block).
     # Доп. атрибуты (**opts: target, class, data: {...} и т.д.) идут
     # ПОСЛЕ пользовательских и ДО loading/id/src — как порядок вставки
     # ключей в turbo_frame_tag гема. Статик-форма
     # (FramesHelper.turbo_frame_tag c opts-Hash) — для дом-билдеров вне
     # вью-контекста (ChatLayout-стиль), как TagHelper.tag_options.
     def turbo_frame_tag(frame_id : String | Symbol, src : String? = nil,
-                        loading : String? = nil, **opts,
-                        &block : Proc(String | ActionView::SafeString)) : ActionView::SafeString
+                        loading : String? = nil, **opts, &) : ActionView::SafeString
       h = {} of String => ::ActionView::Helpers::TagHelper::AttrVal
-      opts.each { |k, v| h[k.to_s] = ActionView::Helpers::TagHelper.__av_normalize_val(v) }
-      result = block.call
-      inner = result.is_a?(ActionView::SafeString) ? result.to_s : HTML.escape(result.to_s)
+      opts.each { |k, v| h[k.to_s] = ::ActionView::Helpers::TagHelper.__av_normalize_val(v) }
+      body = capture { yield }
+      inner = body.is_a?(::ERB::SafeString) ? body.to_s : HTML.escape(body.to_s)
       Turbo::FramesHelper.__frame_html(frame_id, src, loading, h, inner)
-
     end
 
     def turbo_frame_tag(frame_id : String | Symbol, src : String? = nil,
                         loading : String? = nil, **opts) : ActionView::SafeString
       h = {} of String => ::ActionView::Helpers::TagHelper::AttrVal
-      opts.each { |k, v| h[k.to_s] = ActionView::Helpers::TagHelper.__av_normalize_val(v) }
+      opts.each { |k, v| h[k.to_s] = ::ActionView::Helpers::TagHelper.__av_normalize_val(v) }
       Turbo::FramesHelper.__frame_html(frame_id, src, loading, h, "")
     end
   end
@@ -90,7 +92,7 @@ module Turbo
       # Нормализация (idempotent): публичная статик-форма принимает сырые
       # значения (String/Bool/вложенный data-Hash), инстанс-путь может
       # передавать уже нормализованные.
-      opts.each { |k, v| attrs[k.to_s] = ActionView::Helpers::TagHelper.__av_normalize_val(v) }
+      opts.each { |k, v| attrs[k.to_s] = ::ActionView::Helpers::TagHelper.__av_normalize_val(v) }
       attrs["loading"] = loading if loading
       attrs["id"] = frame_id.to_s
       attrs["src"] = src if src
@@ -105,7 +107,7 @@ module Turbo
     private def self.__frame_html_with(frame_id : String | Symbol,
                                        attrs : Hash(String, ActionView::Helpers::TagHelper::AttrVal),
                                        inner : String) : ActionView::SafeString
-      ActionView::SafeString.new("<turbo-frame#{ActionView::Helpers::TagHelper.tag_options(attrs)}>#{inner}</turbo-frame>")
+      ActionView::SafeString.new("<turbo-frame#{::ActionView::Helpers::TagHelper.tag_options(attrs)}>#{inner}</turbo-frame>")
     end
   end
 end

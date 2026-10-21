@@ -9,6 +9,7 @@ require "../src/turbo_cr"
 class TurboFrameView
   include Turbo::FramesHelper
   include ActionView::Helpers::TagHelper
+  include ERB::Rendering
 end
 
 describe "turbo_frame_tag opts" do
@@ -31,7 +32,12 @@ describe "turbo_frame_tag opts" do
     html.should contain %(id="user_sidebar")
   end
 
-  it "block content escapes plain strings, passes SafeString" do
+  it "block content: ERB appends captured raw (safe), returned plain strings escaped" do
+    # ERB-семантика: блок аппендит в буфер — capture собирает как safe.
+    view.turbo_frame_tag("f") { view.__erb_out("<p>x</p>") }.to_s
+      .should eq %(<turbo-frame id="f"><p>x</p></turbo-frame>)
+    # Блок без аппендов, возвращающий plain String — экранируется
+    # (оракул helper_turbo_frame_tag_block); SafeString — как есть.
     view.turbo_frame_tag("f") { "<p>x</p>" }.to_s
       .should eq %(<turbo-frame id="f">&lt;p&gt;x&lt;/p&gt;</turbo-frame>)
     view.turbo_frame_tag("f") { ActionView::SafeString.new("<p>x</p>") }.to_s
